@@ -31,6 +31,7 @@ from cursor import Cursor
 
 from warnings import warn
 
+
 class Collection(PymongoCollection):
 
     def __init__(self, *args, **kwargs):
@@ -44,9 +45,10 @@ class Collection(PymongoCollection):
             if not key in self._documents:
                 self._documents[key] = self._registered_documents[key](collection=self)
                 if self._documents[key].indexes:
-                    warn('%s: Be careful, index generation is not automatic anymore.'
-                      'You have to generate your index youself' % self._documents[key]._obj_class.__name__,
-                      DeprecationWarning)
+                    warn(
+                        '%s: Be careful, index generation is not automatic anymore.'
+                        'You have to generate your index youself' % self._documents[key]._obj_class.__name__,
+                        DeprecationWarning)
                 #self._documents[key].generate_index(self)
             return self._documents[key]
         else:
@@ -63,11 +65,12 @@ class Collection(PymongoCollection):
                             "exists." %
                             self.__name)
         name = self.__name.split(".")[-1]
-        raise TypeError("'Collection' object is not callable. "
-          "If you meant to call the '%s' method on a 'Collection' "
-          "object it is failing because no such method exists.\n"
-          "If '%s' is a Document then you may have forgotten to "
-          "register it to the connection." % (name, name))
+        raise TypeError(
+            "'Collection' object is not callable. "
+            "If you meant to call the '%s' method on a 'Collection' "
+            "object it is failing because no such method exists.\n"
+            "If '%s' is a Document then you may have forgotten to "
+            "register it to the connection." % (name, name))
 
     def find(self, *args, **kwargs):
         if not 'slave_okay' in kwargs and hasattr(self, 'slave_okay'):
@@ -104,7 +107,7 @@ class Collection(PymongoCollection):
         """
         return the document wich has the id
         """
-        return self.find_one({"_id":id})
+        return self.find_one({"_id": id})
 
     def one(self, *args, **kwargs):
         bson_obj = self.find(*args, **kwargs)
@@ -121,7 +124,7 @@ class Collection(PymongoCollection):
         import random
         max = self.count()
         if max:
-            num = random.randint(0, max-1)
+            num = random.randint(0, max - 1)
             return self.find().skip(num).next()
 
     def text(self, search, **kwargs):
@@ -129,4 +132,3 @@ class Collection(PymongoCollection):
         Executes a full-text search. Additional parameters may be passed as keyword arguments.
         """
         return self.database.command("text", self.name, search=search, **kwargs)
-

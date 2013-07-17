@@ -40,11 +40,10 @@ from connection import Connection, MongoClient
 from master_slave_connection import MasterSlaveConnection
 from replica_set_connection import ReplicaSetConnection
 from pymongo import ASCENDING as INDEX_ASCENDING,\
-  DESCENDING as INDEX_DESCENDING,\
-  ALL as INDEX_ALL,\
-  GEO2D as INDEX_GEO2D,\
-  GEOHAYSTACK as INDEX_GEOHAYSTACK,\
-  GEOSPHERE as INDEX_GEOSPHERE,\
-  OFF as INDEX_OFF
+    DESCENDING as INDEX_DESCENDING,\
+    ALL as INDEX_ALL,\
+    GEO2D as INDEX_GEO2D,\
+    GEOHAYSTACK as INDEX_GEOHAYSTACK,\
+    GEOSPHERE as INDEX_GEOSPHERE,\
+    OFF as INDEX_OFF
 from migration import DocumentMigration
-

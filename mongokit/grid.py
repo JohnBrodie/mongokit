@@ -33,6 +33,7 @@ from pymongo import ASCENDING, DESCENDING
 #except:
 #    Magic = None
 
+
 class FS(GridFS):
     def __init__(self, obj):
         self._obj = obj
@@ -140,8 +141,9 @@ class FS(GridFS):
         .. versionadded:: 1.9
         """
         # This is took from pymongo source. We need to go a little deeper here
-        self._GridFS__files.ensure_index([("filename", ASCENDING),
-                                   ("uploadDate", DESCENDING)])
+        self._GridFS__files.ensure_index(
+            [("filename", ASCENDING),
+             ("uploadDate", DESCENDING)])
         ########## Begin of MongoKit hack ##########
         cursor = self._GridFS__files.find(self._get_spec(filename=filename, **kwargs))
         ########## end of MongoKit hack ############
@@ -155,6 +157,7 @@ class FS(GridFS):
             return GridOut(self._GridFS__collection, grid_file["_id"])
         except StopIteration:
             raise NoFile("no version %d for filename %r" % (version, filename))
+
 
 class FSContainer(FS):
     def __init__(self, container_name, obj):
@@ -170,4 +173,3 @@ class FSContainer(FS):
 
     def __repr__(self):
         return "<%s (%s) of object '%s'>" % (self.__class__.__name__, self._container_name, self._obj.__class__.__name__)
-

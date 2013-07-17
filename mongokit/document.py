@@ -25,20 +25,18 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from mongokit import SchemaDocument, SchemaProperties, AutoReferenceError
+from mongokit import SchemaDocument, AutoReferenceError
 from mongokit.mongo_exceptions import *
 from mongokit.schema_document import (
-                        STRUCTURE_KEYWORDS,
-                        CustomType,
-                        SchemaTypeError,
-                        SchemaProperties,
-                        StructureError)
+    STRUCTURE_KEYWORDS,
+    CustomType,
+    SchemaTypeError,
+    SchemaProperties,
+    StructureError)
 from mongokit.helpers import (
-                        totimestamp,
-                        fromtimestamp,
-                        DotCollapsedDict,
-                        DotedDict,
-                        DotExpandedDict)
+    totimestamp,
+    fromtimestamp,
+    DotedDict)
 from mongokit.grid import *
 import pymongo
 from bson import BSON
@@ -56,6 +54,7 @@ STRUCTURE_KEYWORDS += ['_id', '_ns', '_revision', '_version']
 
 log = logging.getLogger(__name__)
 
+
 class DocumentProperties(SchemaProperties):
     def __new__(cls, name, bases, attrs):
         for base in bases:
@@ -66,10 +65,10 @@ class DocumentProperties(SchemaProperties):
                     if parent.indexes:
                         if 'indexes' not in attrs:
                             attrs['indexes'] = []
-                        for index in attrs['indexes']+parent.indexes:
+                        for index in attrs['indexes'] + parent.indexes:
                             if index not in attrs['indexes']:
                                 attrs['indexes'].append(index)
-        return SchemaProperties.__new__(cls, name, bases, attrs)        
+        return SchemaProperties.__new__(cls, name, bases, attrs)
 
     @classmethod
     def _validate_descriptors(cls, attrs):
@@ -82,50 +81,49 @@ class DocumentProperties(SchemaProperties):
                 if index.get('check', True):
                     if 'fields' not in index:
                         raise BadIndexError(
-                          "'fields' key must be specify in indexes")
+                            "'fields' key must be specify in indexes")
                     for key, value in index.iteritems():
                         if key == "fields":
                             if isinstance(value, basestring):
                                 if value not in attrs['_namespaces'] and value not in STRUCTURE_KEYWORDS:
                                     raise ValueError(
-                                      "Error in indexes: can't find %s in structure" % value )
+                                        "Error in indexes: can't find %s in structure" % value)
                             elif isinstance(value, tuple):
                                 if len(value) != 2:
                                     raise BadIndexError(
-                                      "Error in indexes: a tuple must contain "
-                                      "only two value : the field name and the direction")
+                                        "Error in indexes: a tuple must contain "
+                                        "only two value : the field name and the direction")
                                 if not (isinstance(value[1], int) or isinstance(value[1], basestring)):
                                     raise BadIndexError(
-                                      "Error in %s, the direction must be int or basestring (got %s instead)" % (value[0], type(value[1])))
+                                        "Error in %s, the direction must be int or basestring (got %s instead)" % (value[0], type(value[1])))
                                 if not isinstance(value[0], basestring):
                                     raise BadIndexError(
-                                      "Error in %s, the field name must be string (got %s instead)" % (value[0], type(value[0])))
+                                        "Error in %s, the field name must be string (got %s instead)" % (value[0], type(value[0])))
                                 if value[0] not in attrs['_namespaces'] and value[0] not in STRUCTURE_KEYWORDS:
                                     raise ValueError(
-                                      "Error in indexes: can't find %s in structure" % value[0] )
+                                        "Error in indexes: can't find %s in structure" % value[0])
                                 if not value[1] in [pymongo.DESCENDING, pymongo.ASCENDING, pymongo.OFF, pymongo.ALL, pymongo.GEO2D, pymongo.GEOHAYSTACK, pymongo.GEOSPHERE, "text"]:
                                     raise BadIndexError(
-                                      "index direction must be INDEX_DESCENDING, INDEX_ASCENDING, INDEX_OFF, INDEX_ALL, INDEX_GEO2D, INDEX_GEOHAYSTACK, or INDEX_GEOSPHERE. Got %s" % value[1])  # Omit text because it's still beta
+                                        "index direction must be INDEX_DESCENDING, INDEX_ASCENDING, INDEX_OFF, INDEX_ALL, INDEX_GEO2D, INDEX_GEOHAYSTACK, or INDEX_GEOSPHERE. Got %s" % value[1])  # Omit text because it's still beta
                             elif isinstance(value, list):
                                 for val in value:
                                     if isinstance(val, tuple):
                                         field, direction = val
                                         if field not in attrs['_namespaces'] and field not in STRUCTURE_KEYWORDS:
                                             raise ValueError(
-                                              "Error in indexes: can't find %s in structure" % field )
+                                                "Error in indexes: can't find %s in structure" % field)
                                         if not direction in [pymongo.DESCENDING, pymongo.ASCENDING, pymongo.OFF, pymongo.ALL, pymongo.GEO2D, pymongo.GEOHAYSTACK, pymongo.GEOSPHERE, "text"]:
                                             raise BadIndexError(
-                                              "index direction must be INDEX_DESCENDING, INDEX_ASCENDING, INDEX_OFF, INDEX_ALL, INDEX_GEO2D, INDEX_GEOHAYSTACK, or INDEX_GEOSPHERE. Got %s" % direction)  # Omit text because it's still beta
+                                                "index direction must be INDEX_DESCENDING, INDEX_ASCENDING, INDEX_OFF, INDEX_ALL, INDEX_GEO2D, INDEX_GEOHAYSTACK, or INDEX_GEOSPHERE. Got %s" % direction)  # Omit text because it's still beta
                                     else:
                                         if val not in attrs['_namespaces'] and val not in STRUCTURE_KEYWORDS:
                                             raise ValueError(
-                                              "Error in indexes: can't find %s in structure" % val )
+                                                "Error in indexes: can't find %s in structure" % val)
                             else:
                                 raise BadIndexError(
-                                  "fields must be a string, a tuple or a list of tuple (got %s instead)" % type(value))
+                                    "fields must be a string, a tuple or a list of tuple (got %s instead)" % type(value))
                         elif key == "ttl":
                             assert isinstance(value, int)
-
 
 
 class Document(SchemaDocument):
@@ -134,7 +132,7 @@ class Document(SchemaDocument):
 
     type_field = '_type'
 
-    atomic_save = False # XXX Deprecated
+    atomic_save = False  # XXX Deprecated
     skip_validation = False
     use_autorefs = False
     force_autorefs_current_db = False
@@ -143,12 +141,12 @@ class Document(SchemaDocument):
     migration_handler = None
 
     authorized_types = SchemaDocument.authorized_types + [
-      Binary,
-      ObjectId,
-      DBRef,
-      Code,
-      UUID,
-      type(re.compile("")),
+        Binary,
+        ObjectId,
+        DBRef,
+        Code,
+        UUID,
+        type(re.compile("")),
     ]
 
     def __init__(self, doc=None, gen_skel=True, collection=None, lang='en', fallback_lang='en'):
@@ -157,8 +155,8 @@ class Document(SchemaDocument):
         if self.use_autorefs:
             self._authorized_types += [Document, SchemaProperties]
         super(Document, self).__init__(
-          doc=doc, gen_skel=gen_skel, gen_auth_types=False, lang=lang,
-          fallback_lang=fallback_lang
+            doc=doc, gen_skel=gen_skel, gen_auth_types=False, lang=lang,
+            fallback_lang=fallback_lang
         )
         if self.type_field in self:
             self[self.type_field] = unicode(self.__class__.__name__)
@@ -196,12 +194,13 @@ class Document(SchemaDocument):
         if process_to_bson:
             self._process_custom_type('bson', self, self.structure)
         self._migration.migrate(self, safe=safe)
-        new_value = DotCollapsedDict(self)
+        #new_value = DotCollapsedDict(self)
         # reload
         old_doc = self.collection.get_from_id(self['_id'])
         if not old_doc:
-            raise OperationFailure('Can not reload an unsaved document.'
-              ' %s is not found in the database' % self['_id'])
+            raise OperationFailure(
+                'Can not reload an unsaved document.'
+                ' %s is not found in the database' % self['_id'])
         else:
             self.update(DotedDict(old_doc))
         # self.reload()
@@ -230,8 +229,9 @@ class Document(SchemaDocument):
         (size_limit, size_limit_str) = self._get_size_limit()
 
         if size > size_limit:
-            raise MaxDocumentSizeError("The document size is too big, documents "
-              "lower than %s is allowed (got %s bytes)" % (size_limit_str, size))
+            raise MaxDocumentSizeError(
+                "The document size is too big, documents "
+                "lower than %s is allowed (got %s bytes)" % (size_limit_str, size))
         if auto_migrate:
             error = None
             try:
@@ -304,7 +304,7 @@ class Document(SchemaDocument):
         `one()` act like `find()` but will raise a
         `mongokit.MultipleResultsFound` exception if there is more than one
         result.
-    
+
         If no document is found, `one()` returns `None`
         """
         bson_obj = self.find(*args, **kwargs)
@@ -325,7 +325,7 @@ class Document(SchemaDocument):
         import random
         max = self.collection.count()
         if max:
-            num = random.randint(0, max-1)
+            num = random.randint(0, max - 1)
             return self.find().skip(num).next()
 
     def text(self, search, **kwargs):
@@ -342,7 +342,7 @@ class Document(SchemaDocument):
         """
         return the document which has the id
         """
-        return self.find_one({"_id":id})
+        return self.find_one({"_id": id})
 
     def fetch(self, spec=None, *args, **kwargs):
         """
@@ -356,9 +356,9 @@ class Document(SchemaDocument):
         for key in self.structure:
             if key in spec:
                 if isinstance(spec[key], dict):
-                    spec[key].update({'$exists':True})
+                    spec[key].update({'$exists': True})
             else:
-                spec[key] = {'$exists':True}
+                spec[key] = {'$exists': True}
         return self.find(spec, *args, **kwargs)
 
     def fetch_one(self, *args, **kwargs):
@@ -382,7 +382,7 @@ class Document(SchemaDocument):
         """
         allow to refresh the document, so after using update(), it could reload
         its value from the database.
-        
+
         Be carrefull : reload() will erase all unsaved values.
 
         If no _id is set in the document, a KeyError is raised.
@@ -390,8 +390,9 @@ class Document(SchemaDocument):
         self._process_custom_type('bson', self, self.structure)
         old_doc = self.collection.get_from_id(self['_id'])
         if not old_doc:
-            raise OperationFailure('Can not reload an unsaved document.'
-              ' %s is not found in the database' % self['_id'])
+            raise OperationFailure(
+                'Can not reload an unsaved document.'
+                ' %s is not found in the database' % self['_id'])
         else:
             self.update(DotedDict(old_doc))
         self._process_custom_type('python', self, self.structure)
@@ -425,14 +426,14 @@ class Document(SchemaDocument):
             if uuid:
                 self['_id'] = unicode("%s-%s" % (self.__class__.__name__, uuid4()))
         self._process_custom_type('bson', self, self.structure)
-        id = self.collection.save(self, safe=safe, *args, **kwargs)
+        self.collection.save(self, safe=safe, *args, **kwargs)
         self._process_custom_type('python', self, self.structure)
 
     def delete(self):
         """
         delete the document from the collection from his _id.
         """
-        self.collection.remove({'_id':self['_id']})
+        self.collection.remove({'_id': self['_id']})
 
     @classmethod
     def generate_index(cls, collection):
@@ -443,14 +444,14 @@ class Document(SchemaDocument):
         # creating index if needed
         for index in deepcopy(cls.indexes):
             unique = False
-            if index.has_key('unique'):
+            if 'unique' in index:
                 unique = index.pop('unique')
             ttl = 300
-            if index.has_key('ttl'):
+            if 'ttl' in index:
                 ttl = index.pop('ttl')
-            
+
             given_fields = index.pop("fields", list())
-            
+
             if isinstance(given_fields, tuple):
                 fields = [given_fields]
             elif isinstance(given_fields, basestring):
@@ -473,13 +474,13 @@ class Document(SchemaDocument):
             """
             convert all datetime to a timestamp from epoch
             """
-            if struct != None:
+            if struct is not None:
                 for key in struct:
                     if isinstance(struct[key], datetime.datetime):
                         struct[key] = totimestamp(struct[key])
                     elif isinstance(struct[key], ObjectId):
                         #struct[key] = str(struct[key])
-                        struct[key] = {'$oid': str(struct[key])} 
+                        struct[key] = {'$oid': str(struct[key])}
                     elif isinstance(struct[key], dict):
                         _convert_to_json(struct[key], doc)
                     elif isinstance(struct[key], list) and len(struct[key]):
@@ -508,8 +509,8 @@ class Document(SchemaDocument):
         def _convert_to_python(doc, struct):
             for key in struct:
                 if isinstance(struct[key], dict):
-                    if doc: # we don't need to process an empty doc
-                        if key in doc: # we don't care about missing fields
+                    if doc:  # we don't need to process an empty doc
+                        if key in doc:  # we don't care about missing fields
                             _convert_to_python(doc[key], struct[key])
                 elif type(struct[key]) is list:
                     if struct[key]:
@@ -542,7 +543,7 @@ class Document(SchemaDocument):
         """
         convert a json string and return a SchemaDocument
         """
-        def _convert_to_python(doc, struct, path = "", root_path=""):
+        def _convert_to_python(doc, struct, path="", root_path=""):
             for key in struct:
                 if type(key) is type:
                     new_key = '$%s' % key.__name__
@@ -550,8 +551,8 @@ class Document(SchemaDocument):
                     new_key = key
                 new_path = ".".join([path, new_key]).strip('.')
                 if isinstance(struct[key], dict):
-                    if doc: # we don't need to process an empty doc
-                        if key in doc: # we don't care about missing fields
+                    if doc:  # we don't need to process an empty doc
+                        if key in doc:  # we don't care about missing fields
                             _convert_to_python(doc[key], struct[key], new_path, root_path)
                 elif type(struct[key]) is list:
                     if struct[key]:
@@ -612,7 +613,6 @@ class Document(SchemaDocument):
             if '$oid' in obj['_id']:
                 obj['_id'] = ObjectId(obj['_id']['$oid'])
         return self._obj_class(obj, collection=self.collection)
- 
 
     #
     # End of public API
@@ -633,9 +633,9 @@ class Document(SchemaDocument):
     def __getattribute__(self, key):
         if key in ['collection', 'db', 'connection']:
             if self.__dict__.get(key) is None:
-                raise ConnectionError('No collection found') 
+                raise ConnectionError('No collection found')
         return super(Document, self).__getattribute__(key)
- 
+
     def _make_reference(self, doc, struct, path=""):
         """
         * wrap all MongoDocument with the CustomType "R()"
@@ -668,9 +668,10 @@ class Document(SchemaDocument):
                     #doc._process_custom_type('python', doc, doc.structure)
                 # be sure that we have an instance of MongoDocument
                 if not isinstance(doc[key], struct[key]._doc) and doc[key] is not None:
-                    self._raise_exception(SchemaTypeError, new_path, 
-                      "%s must be an instance of %s not %s" % (
-                        new_path, struct[key]._doc.__name__, type(doc[key]).__name__))
+                    self._raise_exception(
+                        SchemaTypeError, new_path,
+                        "%s must be an instance of %s not %s" % (
+                            new_path, struct[key]._doc.__name__, type(doc[key]).__name__))
                 # validate the embed doc
                 if not self.skip_validation and doc[key] is not None:
                     doc[key].validate()
@@ -698,13 +699,13 @@ class Document(SchemaDocument):
                 # it with None values
                 #
                 if len(struct[key]) and\
-                  not [i for i in struct[key].keys() if type(i) is type]: 
+                  not [i for i in struct[key].keys() if type(i) is type]:
                     if key in doc:
                         self._make_reference(doc[key], struct[key], new_path)
-                else:# case {unicode:int}
+                else:  # case {unicode:int}
                     pass
             elif isinstance(struct[key], list) and len(struct[key]):
-                if isinstance( struct[key][0], SchemaProperties) or isinstance(struct[key][0], R):
+                if isinstance(struct[key][0], SchemaProperties) or isinstance(struct[key][0], R):
                     if not isinstance(struct[key][0], R):
                         db_name = None
                         if self.force_autorefs_current_db:
@@ -715,8 +716,9 @@ class Document(SchemaDocument):
                         if isinstance(obj, DBRef):
                             obj = getattr(self.connection[obj.database][obj.collection], struct[key][0]._doc.__name__).get_from_id(obj.id)
                         if not isinstance(obj, struct[key][0]._doc) and obj is not None:
-                            self._raise_exception(SchemaTypeError, new_path,
-                              "%s must be an instance of Document not %s" % (
+                            self._raise_exception(
+                                SchemaTypeError, new_path,
+                                "%s must be an instance of Document not %s" % (
                                 new_path, type(obj).__name__))
                         full_new_path = "%s.%s" % (new_path, no)
                         # validate the embed doc
@@ -736,7 +738,8 @@ class Document(SchemaDocument):
                         doc[key] = l_objs
                 elif isinstance(struct[key][0], dict):
                     for no, obj in enumerate(doc[key]):
-                        self._make_reference(obj, struct[key][0], "%s.%s" % (new_path,no))
+                        self._make_reference(obj, struct[key][0], "%s.%s" % (new_path, no))
+
 
 class R(CustomType):
     """ CustomType to deal with autorefs documents """
@@ -748,11 +751,11 @@ class R(CustomType):
         self._doc = doc
         self._fallback_database = fallback_database
         self.connection = connection
-    
+
     def to_bson(self, value):
         if value is not None:
             return DBRef(database=value.db.name, collection=value.collection.name, id=value['_id'])
-        
+
     def to_python(self, value):
         if value is not None:
             if not isinstance(value, DBRef):
@@ -765,16 +768,18 @@ class R(CustomType):
             else:
                 database = self._fallback_database
             if database is None:
-                raise RuntimeError("It appears that you try to use autorefs. I found a DBRef without"
-                  " database specified.\n If you do want to use the current database, you"
-                  " have to add the attribute `force_autorefs_current_db` as True. Please see the doc"
-                  " for more details.\n The DBRef without database is : %s " % value)
+                raise RuntimeError(
+                    "It appears that you try to use autorefs. I found a DBRef without"
+                    " database specified.\n If you do want to use the current database, you"
+                    " have to add the attribute `force_autorefs_current_db` as True. Please see the doc"
+                    " for more details.\n The DBRef without database is : %s " % value)
             col = self.connection[database][value.collection]
-            doc = col.find_one({'_id':value.id})
+            doc = col.find_one({'_id': value.id})
             if doc is None:
-                raise AutoReferenceError('Something wrong append. You probably change'
-                  ' your object when passing it as a value to an autorefs enable document.\n'
-                  'A document with id "%s" is not saved in the database "%s" but was giving as'
-                  ' a reference to a %s document' % (value.id, database, self._doc.__name__))
+                raise AutoReferenceError(
+                    'Something wrong append. You probably change'
+                    ' your object when passing it as a value to an autorefs enable document.\n'
+                    'A document with id "%s" is not saved in the database "%s" but was giving as'
+                    ' a reference to a %s document' % (value.id, database, self._doc.__name__))
             return self._doc(doc, collection=col)
 

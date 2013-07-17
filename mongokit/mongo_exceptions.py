@@ -25,17 +25,34 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from bson import InvalidDocument
 
-try:
-    from pymongo.connection import OperationFailure
-except ImportError:
-    from pymongo.errors import OperationFailure
-class ConnectionError(Exception):pass
-class MongoAuthException(Exception):pass
-class MultipleResultsFound(Exception):pass
-class BadIndexError(Exception):pass
-class AutoReferenceError(Exception):pass
-class MaxDocumentSizeError(Exception):pass
-class OptionConflictError(Exception):pass
-class UpdateQueryError(Exception):pass
+class ConnectionError(Exception):
+    pass
+
+
+class MongoAuthException(Exception):
+    pass
+
+
+class MultipleResultsFound(Exception):
+    pass
+
+
+class BadIndexError(Exception):
+    pass
+
+
+class AutoReferenceError(Exception):
+    pass
+
+
+class MaxDocumentSizeError(Exception):
+    pass
+
+
+class OptionConflictError(Exception):
+    pass
+
+
+class UpdateQueryError(Exception):
+    pass
