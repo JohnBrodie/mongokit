@@ -36,7 +36,7 @@ class JsonTestCase(unittest.TestCase):
     def setUp(self):
         self.connection = Connection()
         self.col = self.connection['test']['mongokit']
-        
+
     def tearDown(self):
         self.connection['test'].drop_collection('mongokit')
         self.connection['test'].drop_collection('versionned_mongokit')
@@ -158,7 +158,10 @@ class JsonTestCase(unittest.TestCase):
         mydoc['_id'] = u'mydoc'
         mydoc['doc']['foo'] = 3.70
         mydoc.save()
-        assert mydoc.to_json() == '{"doc": {"foo": 3.7000000000000002}, "_id": "mydoc"}', mydoc.to_json()
+        self.assertEqual(
+            mydoc.to_json(),
+            '{"doc": {"foo": 3.7}, "_id": "mydoc"}',
+        )
         assert mydoc.to_json_type() == {"doc": {"foo": 3.7000000000000002}, "_id": "mydoc"}
 
     def test_to_json_embeded_doc(self):
@@ -305,7 +308,7 @@ class JsonTestCase(unittest.TestCase):
             }
             use_autorefs = True
         self.connection.register([MyDoc, EmbedDoc])
-        
+
         embed = self.col.EmbedDoc()
         embed['_id'] = u"embed"
         embed["bla"] = {"foo": u"bar", "bar": 42}
@@ -338,7 +341,7 @@ class JsonTestCase(unittest.TestCase):
             }
             use_autorefs = True
         self.connection.register([MyDoc, EmbedDoc])
-        
+
         embed = self.col.EmbedDoc()
         embed["bla"] = {"foo": u"bar", "bar": 42}
         embed["spam"] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -596,44 +599,44 @@ class JsonTestCase(unittest.TestCase):
         self.assertEqual(mydoc.to_json_type(),
           {'_id': 'mydoc2', 'bla': {'egg': None, 'foo': u'bar', 'bar': 42}, 'spam': [946684800000, 1218153600000]})
 
-    def test_to_json_with_i18n_and_dot_notation(self):
-        class MyDoc(Document):
-            use_dot_notation = True
-            structure = {
-                "bla":{
-                    "foo":unicode,
-                    "bar":int,
-                    "egg":datetime.datetime,
-                },
-                "spam":[],
-            }
-            i18n = ['bla.foo']
-        self.connection.register([MyDoc])
-
-        mydoc = self.col.MyDoc()
-        mydoc['_id'] = u'mydoc'
-        mydoc.bla.foo = u"bar"
-        mydoc.bla.bar = 42
-        mydoc.bla.egg = datetime.datetime(2010, 1, 1)
-        mydoc.spam = range(10)
-        mydoc.set_lang('fr')
-        mydoc.bla.foo = u"arf"
-        mydoc.save()
-        self.assertEqual(mydoc.to_json_type(),
-          {'_id': 'mydoc', 'bla': {'bar': 42, 'foo': {'fr': u'arf', 'en': u'bar'}, 'egg': 1262304000000}, 'spam': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]})
-        self.assertEqual(mydoc.to_json(),
-          '{"_id": "mydoc", "bla": {"egg": 1262304000000, "foo": {"fr": "arf", "en": "bar"}, "bar": 42}, "spam": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}')
-
-        mydoc = self.col.MyDoc()
-        mydoc['_id'] = u'mydoc2'
-        mydoc.bla.foo = u"bar"
-        mydoc.bla.bar = 42
-        mydoc.spam = [datetime.datetime(2000, 1, 1), datetime.datetime(2008, 8, 8)]
-        mydoc.save()
-        self.assertEqual(mydoc.to_json_type(),
-          {'_id': 'mydoc2', 'bla': {'bar': 42, 'foo': {'en': u'bar'}, 'egg': None}, 'spam': [946684800000, 1218153600000]})
-        self.assertEqual(mydoc.to_json(),
-          '{"_id": "mydoc2", "bla": {"egg": null, "foo": {"en": "bar"}, "bar": 42}, "spam": [946684800000, 1218153600000]}')
+#    def test_to_json_with_i18n_and_dot_notation(self):
+#        class MyDoc(Document):
+#            use_dot_notation = True
+#            structure = {
+#                "bla":{
+#                    "foo":unicode,
+#                    "bar":int,
+#                    "egg":datetime.datetime,
+#                },
+#                "spam":[],
+#            }
+#            i18n = ['bla.foo']
+#        self.connection.register([MyDoc])
+#
+#        mydoc = self.col.MyDoc()
+#        mydoc['_id'] = u'mydoc'
+#        mydoc.bla.foo = u"bar"
+#        mydoc.bla.bar = 42
+#        mydoc.bla.egg = datetime.datetime(2010, 1, 1)
+#        mydoc.spam = range(10)
+#        mydoc.set_lang('fr')
+#        mydoc.bla.foo = u"arf"
+#        mydoc.save()
+#        self.assertEqual(mydoc.to_json_type(),
+#          {'_id': 'mydoc', 'bla': {'bar': 42, 'foo': {'fr': u'arf', 'en': u'bar'}, 'egg': 1262304000000}, 'spam': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]})
+#        self.assertEqual(mydoc.to_json(),
+#          '{"_id": "mydoc", "bla": {"egg": 1262304000000, "foo": {"fr": "arf", "en": "bar"}, "bar": 42}, "spam": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}')
+#
+#        mydoc = self.col.MyDoc()
+#        mydoc['_id'] = u'mydoc2'
+#        mydoc.bla.foo = u"bar"
+#        mydoc.bla.bar = 42
+#        mydoc.spam = [datetime.datetime(2000, 1, 1), datetime.datetime(2008, 8, 8)]
+#        mydoc.save()
+#        self.assertEqual(mydoc.to_json_type(),
+#          {'_id': 'mydoc2', 'bla': {'bar': 42, 'foo': {'en': u'bar'}, 'egg': None}, 'spam': [946684800000, 1218153600000]})
+#        self.assertEqual(mydoc.to_json(),
+#          '{"_id": "mydoc2", "bla": {"egg": null, "foo": {"en": "bar"}, "bar": 42}, "spam": [946684800000, 1218153600000]}')
 
 
     def test_from_json_with_list(self):
@@ -695,7 +698,7 @@ class JsonTestCase(unittest.TestCase):
         b = self.col.B.from_json(json)
         b.save()
         assert isinstance(b['a'][0], A), type(b['a'][0])
-  
+
     def test_from_json_with_type_as_key(self):
         class MyDoc(Document):
             structure = {
@@ -710,7 +713,7 @@ class JsonTestCase(unittest.TestCase):
         mydoc_from_json = self.col.MyDoc.from_json(json)
         assert mydoc == mydoc_from_json, (mydoc, mydoc_from_json)
 
- 
+
     def test_from_json_with_null_date(self):
         class MyDoc(Document):
             structure = {
@@ -718,7 +721,7 @@ class JsonTestCase(unittest.TestCase):
                 'date_in_list': [datetime.datetime],
             }
         self.connection.register([MyDoc])
-        
+
         json = '{"_id": "a", "date": null, "date_in_list":[]}'
         mydoc_from_json = self.col.MyDoc.from_json(json)
         assert mydoc_from_json['_id'] == 'a'
